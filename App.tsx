@@ -1,9 +1,22 @@
 import { Box, Column, Columns, Inline, Stack } from '@mobily/stacks';
 import CheckBox from 'expo-checkbox';
+import firebase from 'firebase';
 import React, { useState } from 'react';
 import { Button, StyleSheet, Text, TextInput, View } from 'react-native';
 import AutoHeightImage from 'react-native-auto-height-image';
 import { OLIB_COVERS_URL, OLIB_URL } from './src/constants';
+
+const firebaseConfig = {
+    apiKey: 'AIzaSyBoJI3CS8zsvoMJ_XfElm5aULi0KGxWSks',
+    authDomain: 'book-list-95cd0.firebaseapp.com',
+    projectId: 'book-list-95cd0',
+    storageBucket: 'book-list-95cd0.appspot.com',
+    messagingSenderId: '720527672919',
+    appId: '1:720527672919:web:3fe401e39cc3d848480512',
+    measurementId: 'G-0DLTZTZ7LP',
+};
+
+firebase.initializeApp(firebaseConfig);
 
 export default function App() {
     const [text, setText] = useState<string>('dune frank herbert');
