@@ -17,12 +17,19 @@ const firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
+firebase.analytics();
+
+const googleAuthProvider = new firebase.auth.GoogleAuthProvider();
 
 export default function App() {
     const [text, setText] = useState<string>('dune frank herbert');
     const [res, setRes] = useState<any[]>([]);
     return (
         <Stack space={4}>
+            <Button
+                title="sign in with gooogle"
+                onPress={() => firebase.auth().signInWithPopup(googleAuthProvider)}
+            />
             <Columns>
                 <Column width="2/3">
                     <TextInput
