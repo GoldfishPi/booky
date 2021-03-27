@@ -1,0 +1,12 @@
+{
+  "name": "book-list",
+  "displayName": "book-list",
+  "expo": {
+    "name": "book-list",
+    "slug": "book-list",
+    "version": "1.0.0",
+    "assetBundlePatterns": [
+      "**/*"
+    ]
+  }
+}
