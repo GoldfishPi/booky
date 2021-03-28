@@ -2,7 +2,9 @@ import { Box, Column, Columns, Inline, Stack } from '@mobily/stacks';
 import CheckBox from 'expo-checkbox';
 import firebase from 'firebase';
 import React, { useState } from 'react';
-import { Button, StyleSheet, Text, TextInput, View } from 'react-native';
+import { useAuthState } from 'react-firebase-hooks/auth';
+import { useCollection } from 'react-firebase-hooks/firestore';
+import { Button, Text, TextInput, View } from 'react-native';
 import AutoHeightImage from 'react-native-auto-height-image';
 import { OLIB_COVERS_URL, OLIB_URL } from './src/constants';
 
@@ -24,12 +26,23 @@ const googleAuthProvider = new firebase.auth.GoogleAuthProvider();
 export default function App() {
     const [text, setText] = useState<string>('dune frank herbert');
     const [res, setRes] = useState<any[]>([]);
+    const [auth] = useAuthState(firebase.auth());
+    const [readingLists] = useCollection<{
+        name: string;
+        books: {
+            book: { name: string; id: string; cover: string };
+            dnf: boolean;
+            completed: boolean;
+        }[];
+    }>(firebase.firestore().collection('reading-list'));
     return (
         <Stack space={4}>
-            <Button
-                title="sign in with gooogle"
-                onPress={() => firebase.auth().signInWithPopup(googleAuthProvider)}
-            />
+            {!auth && (
+                <Button
+                    title="sign in with gooogle"
+                    onPress={() => firebase.auth().signInWithPopup(googleAuthProvider)}
+                />
+            )}
             <Columns>
                 <Column width="2/3">
                     <TextInput
@@ -53,6 +66,38 @@ export default function App() {
                     />
                 </Column>
             </Columns>
+            <Stack>
+                {readingLists?.docs.map((doc) => (
+                    <>
+                        <Text key={doc.id}>{doc.data().name}</Text>
+                        {doc.data().books.map(({ book, dnf, completed }) => (
+                            <Stack key={book.id} space={2}>
+                                <Text>{book.name}</Text>
+                                <Inline space={4}>
+                                    <AutoHeightImage
+                                        source={{
+                                            uri: book.cover,
+                                        }}
+                                        width={200}
+                                    />
+                                    <Box>
+                                        <Stack space={2}>
+                                            <Inline>
+                                                <Text>Completed</Text>
+                                                <CheckBox value={completed} />
+                                            </Inline>
+                                            <Inline>
+                                                <Text>DNF</Text>
+                                                <CheckBox value={dnf} />
+                                            </Inline>
+                                        </Stack>
+                                    </Box>
+                                </Inline>
+                            </Stack>
+                        ))}
+                    </>
+                ))}
+            </Stack>
             <Stack space={4}>
                 {res.map((book) => (
                     <View key={book.key}>
@@ -70,18 +115,35 @@ export default function App() {
                                     </Text>
                                     <Inline>
                                         <Text>Completed</Text>
-                                        <CheckBox
-                                            onValueChange={() => console.log('value change')}
-                                            value={true}
-                                        />
+                                        <CheckBox value={true} />
                                     </Inline>
                                     <Inline>
                                         <Text>DNF</Text>
-                                        <CheckBox
-                                            onValueChange={() => console.log('value change')}
-                                            value={true}
-                                        />
+                                        <CheckBox value={true} />
                                     </Inline>
+                                    <Button
+                                        title="add to list"
+                                        onPress={() => {
+                                            firebase
+                                                .firestore()
+                                                .collection('reading-list')
+                                                .doc('IItAEMpCVBngtidSRgzj')
+                                                .update({
+                                                    name: 'blah',
+                                                    books: firebase.firestore.FieldValue.arrayUnion(
+                                                        {
+                                                            completed: false,
+                                                            dnf: false,
+                                                            book: {
+                                                                name: book.title,
+                                                                id: book.key,
+                                                                cover: `${OLIB_COVERS_URL}/b/olid/${book.cover_edition_key}-M.jpg`,
+                                                            },
+                                                        }
+                                                    ),
+                                                });
+                                        }}
+                                    />
                                 </Stack>
                             </Box>
                         </Inline>
@@ -91,5 +153,3 @@ export default function App() {
         </Stack>
     );
 }
-
-const styles = StyleSheet.create({});
