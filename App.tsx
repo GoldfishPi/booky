@@ -90,6 +90,23 @@ export default function App() {
                                                 <Text>DNF</Text>
                                                 <CheckBox value={dnf} />
                                             </Inline>
+                                            <Button
+                                                title="Remove from list"
+                                                onPress={() => {
+                                                    firebase
+                                                        .firestore()
+                                                        .collection('reading-list')
+                                                        .doc(doc.id)
+                                                        .update({
+                                                            books: doc
+                                                                .data()
+                                                                .books.filter(
+                                                                    ({ book: b }) =>
+                                                                        b.id !== book.id
+                                                                ),
+                                                        });
+                                                }}
+                                            />
                                         </Stack>
                                     </Box>
                                 </Inline>
