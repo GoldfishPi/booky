@@ -20,6 +20,7 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 firebase.analytics();
+const db = firebase.firestore();
 
 const googleAuthProvider = new firebase.auth.GoogleAuthProvider();
 
@@ -84,11 +85,56 @@ export default function App() {
                                         <Stack space={2}>
                                             <Inline>
                                                 <Text>Completed</Text>
-                                                <CheckBox value={completed} />
+                                                <CheckBox
+                                                    value={completed}
+                                                    onValueChange={(value) =>
+                                                        db
+                                                            .collection('reading-list')
+                                                            .doc(doc.id)
+                                                            .update({
+                                                                books: [
+                                                                    ...doc
+                                                                        .data()
+                                                                        .books.filter(
+                                                                            (b) =>
+                                                                                b.book.id !==
+                                                                                book.id
+                                                                        ),
+                                                                    {
+                                                                        book,
+                                                                        dnf,
+                                                                        completed: value,
+                                                                    },
+                                                                ],
+                                                            })
+                                                    }
+                                                />
                                             </Inline>
                                             <Inline>
                                                 <Text>DNF</Text>
-                                                <CheckBox value={dnf} />
+                                                <CheckBox
+                                                    value={dnf}
+                                                    onValueChange={(value) => {
+                                                        db.collection('reading-list')
+                                                            .doc(doc.id)
+                                                            .update({
+                                                                books: [
+                                                                    ...doc
+                                                                        .data()
+                                                                        .books.filter(
+                                                                            (b) =>
+                                                                                b.book.id !==
+                                                                                book.id
+                                                                        ),
+                                                                    {
+                                                                        book,
+                                                                        dnf: value,
+                                                                        completed,
+                                                                    },
+                                                                ],
+                                                            });
+                                                    }}
+                                                />
                                             </Inline>
                                             <Button
                                                 title="Remove from list"
